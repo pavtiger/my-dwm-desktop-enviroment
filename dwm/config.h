@@ -36,7 +36,7 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Firefox",    NULL,       NULL,       1,       0,           0 },
+	{ "Opera",    NULL,       NULL,       1,       0,           0 },
     { "cool-retro-term",    NULL,       NULL,       2,       0,           0 },
     { "Nemo",    NULL,       NULL,       4,       0,           0 },
     { "TelegramDesktop",    NULL,       NULL,       8,       0,           0 },
@@ -80,6 +80,7 @@ static const char *swap_wallpaper_to_sfw[] = { "wallpapergen", "--sfw", NULL };
 static const char *wallpaper_move_right[] = { "wallpapergen", "--right", NULL };
 static const char *wallpaper_move_left[] = { "wallpapergen", "--left", NULL };
 static const char *wallpaper_ban[] = { "wallpapergen", "--ban", NULL };
+static const char *wallpaper_info[] = { "wallpapergen", "--info", NULL };
 
 static const char *up_vol[]   = { "/usr/bin/pactl", "set-sink-volume", "alsa_output.pci-0000_2b_00.4.analog-stereo", "+5%",     NULL };
 static const char *down_vol[] = { "/usr/bin/pactl", "set-sink-volume", "alsa_output.pci-0000_2b_00.4.analog-stereo", "-5%",     NULL };
@@ -94,20 +95,21 @@ static Key keys[] = {
     // spawn programs
 	{ MODKEY,               XK_p,                       spawn,          { .v = dmenucmd } },
     { MODKEY,               XK_Return,                  spawn,          { .v = termcmd } },
-    { MODKEY,               XK_e,                       spawn,          { .v = filescmd } },
+//  { MODKEY,               XK_e,                       spawn,          { .v = filescmd } },
 	{ MODKEY,               XK_w,                       spawn,          { .v = swap_wallpaper } },  // generate new background images
     { MODKEY,               XK_s,                       spawn,          { .v = swap_wallpaper_to_sfw } },  // safe for work mode
     { MODKEY,               XK_F11,                     spawn,          { .v = wallpaper_move_left } },  // move right (or up)
     { MODKEY,               XK_F12,                     spawn,          { .v = wallpaper_move_right } },  // move left (or down) 
-    { MODKEY,               XK_l,                       spawn,          { .v = wallpaper_ban } },  // ban image 
-
-    { MODKEY,               XK_Print,                   spawn,          { .v = print_screen } },  // Print screen 
+    { MODKEY,               XK_o,                       spawn,          { .v = wallpaper_ban } },  // ban image 
+    { MODKEY,               XK_i,                       spawn,          { .v = wallpaper_info } },  // get image metadata 
+    
+    { MODKEY,               XK_Print,                   spawn,          { .v = print_screen } },  // print screen 
 
     // Close program
 	{ MODKEY|ShiftMask,     XK_c,                       killclient,     {0} },
 
     // Exit dwm
-	{ MODKEY|ShiftMask,     XK_q,                       quit,           {0} },
+	{ MODKEY|ShiftMask,     XK_q,                       quitprompt,           {0} },
 
     // Audio controls
 	{ 0,                    XF86XK_AudioLowerVolume,    spawn,          {.v = down_vol } },
@@ -131,7 +133,7 @@ static Key keys[] = {
     // Master & stack navigation
 	{ MODKEY,               XK_j,                       focusstack,     {.i = +1 } },
 	{ MODKEY,               XK_k,                       focusstack,     {.i = -1 } },
-	{ MODKEY,               XK_i,                       incnmaster,     {.i = +1 } },
+	{ MODKEY,               XK_e,                       incnmaster,     {.i = +1 } },
 	{ MODKEY,               XK_d,                       incnmaster,     {.i = -1 } },
 	{ MODKEY,               XK_h,                       setmfact,       {.f = -0.05} },
 	{ MODKEY,               XK_l,                       setmfact,       {.f = +0.05} },

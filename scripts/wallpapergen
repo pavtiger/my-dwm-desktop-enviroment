@@ -1,17 +1,20 @@
 #!/usr/bin/env python
+import os
 from os import system, listdir, walk
 from os.path import exists, isfile, join, expanduser
 from random import choice
 from PIL import Image
 from json import load, dump
 import argparse
+import subprocess
 
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--sfw",   required=False, help="Safe for work mode. Choose another background image", action='store_true')
 ap.add_argument("--left",  required=False, help="Move image cropout area to the left (or down in album mode)", action='store_true')
 ap.add_argument("--right", required=False, help="Move image cropout area to the right (or up in album mode)", action='store_true')
-ap.add_argument("--ban", required=False, help="Ban current wallpaper from showing", action='store_true')
+ap.add_argument("--ban",   required=False, help="Ban current wallpaper from showing", action='store_true')
+ap.add_argument("--info",  required=False, help="Display metadata of current wallpaper and copy path/contents to clipboard", action='store_true')
 args = vars(ap.parse_args())
 
 # This script expects you to have a lot of your favourite wallpapers in "~/Pictures/wallpapers/JINX"
@@ -20,6 +23,7 @@ wallpaper_directory = expanduser("~/Pictures/wallpapers/JINX");
 sfw_wallpaper_image = expanduser("~/Pictures/wallpapers/cosmic-cliffs.png");
 cache_directory = expanduser("~/.cache")
 
+# Load data file with all information for images
 data_file_path = join(wallpaper_directory, "wallpaper_info.json") 
 if exists(data_file_path):
     with open(data_file_path, "r") as file:
@@ -34,9 +38,30 @@ else:
             "adjustments": {}
     }
 
+# Get current image metadata
+if args["info"]:
+    process = subprocess.Popen(f'echo -e "content\npath" | dmenu -i -sb orange -sf black -p "path: {data["path"]}"', shell=True, stdout=subprocess.PIPE)
+    process.wait()
+   
+    operation_seleted = process.stdout.read()
+    if operation_seleted == b'path\n':
+        os.system(f'echo "{data["path"]}" | xclip -sel clipboard')
+    elif operation_seleted == b'content\n':
+        print(f'cat {data["path"]} | xclip -sel clipboard -target image/png -i')
+        os.system(f'cat {data["path"]} | xclip -sel clipboard -target image/png -i')
+    
+    exit(0)
+
+# Mark image as bad and never choose it again
 if args["ban"]:
-    if data["path"] not in banned_images:
-        data["banned_images"].append(data["path"])
+    process = subprocess.Popen('echo -e "no\nyes" | dmenu -i -sb orange -sf black -p "confirm action"', shell=True, stdout=subprocess.PIPE)
+    process.wait()
+
+    if process.stdout.read() == b'yes\n':
+        if data["path"] not in banned_images:
+            data["banned_images"].append(data["path"])
+    else:
+        exit(0)
 
 # calculate dimensions of all screens together
 def calculate_wallpaper_geometry(monitors):
