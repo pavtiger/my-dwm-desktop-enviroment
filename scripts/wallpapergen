@@ -8,6 +8,8 @@ from json import load, dump
 import argparse
 import subprocess
 
+from screeninfo import get_monitors
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--sfw",   required=False, help="Safe for work mode. Choose another background image", action='store_true')
@@ -89,7 +91,8 @@ elif not args["left"] and not args["right"]:
     
 # Set geometry of your monitors [offset_x, offset_y, width, height]
 monitors = [
-    [0,     0,  1920,   1080],
+    [m.x, m.y, m.width, m.height]
+    for m in get_monitors()
 ]
 
 # create wallpaper and paste images to it
