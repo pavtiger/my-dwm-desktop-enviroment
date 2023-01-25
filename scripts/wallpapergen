@@ -11,6 +11,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--sfw",   required=False, help="Safe for work mode. Choose another background image", action='store_true')
 ap.add_argument("--left",  required=False, help="Move image cropout area to the left (or down in album mode)", action='store_true')
 ap.add_argument("--right", required=False, help="Move image cropout area to the right (or up in album mode)", action='store_true')
+ap.add_argument("--ban", required=False, help="Ban current wallpaper from showing", action='store_true')
 args = vars(ap.parse_args())
 
 # This script expects you to have a lot of your favourite wallpapers in "~/Pictures/wallpapers/JINX"
@@ -23,11 +24,19 @@ data_file_path = join(wallpaper_directory, "wallpaper_info.json")
 if exists(data_file_path):
     with open(data_file_path, "r") as file:
         data = load(file)
+        banned_images = set()
+        for elem in data["banned_images"]:
+            banned_images.add(elem)
 else:
     data = {
             "path": "",
+            "banned_images": [],
             "adjustments": {}
-            }
+    }
+
+if args["ban"]:
+    if data["path"] not in banned_images:
+        data["banned_images"].append(data["path"])
 
 # calculate dimensions of all screens together
 def calculate_wallpaper_geometry(monitors):
@@ -48,9 +57,10 @@ if args["sfw"]:
 elif not args["left"] and not args["right"]:
     for root, dirs, files in walk(wallpaper_directory):
         for image in files:
-            if isfile(join(root, image)):
+            path = join(root, image)
+            if isfile(path) and path not in banned_images:
                 if image.lower().endswith((".png", ".jpg")):
-                    all_images.append(join(root, image))
+                    all_images.append(path)
     
 # Set geometry of your monitors [offset_x, offset_y, width, height]
 monitors = [
@@ -64,13 +74,13 @@ for index, monitor in enumerate(monitors):
     path = ""
     if args["left"]:
         path = data["path"]
-        if path in data["adjustments"].keys():
+        if path in data["adjustments"]:
             data["adjustments"][path] -= 10
         else:
             data["adjustments"][path] = -10
     elif args["right"]:
         path = data["path"]
-        if path in data["adjustments"].keys():
+        if path in data["adjustments"]:
             data["adjustments"][path] += 10
         else:
             data["adjustments"][path] = 10
@@ -80,10 +90,9 @@ for index, monitor in enumerate(monitors):
     data["path"] = path
     image = Image.open(path) # load random wallpaper
     adjustment = 0
-    if path in data["adjustments"].keys():
+    if path in data["adjustments"]:
         adjustment = data["adjustments"][path]
    
-    print(adjustment, path)
     width, height = image.size
     if width >= height / 9 * 16:
         # Change width

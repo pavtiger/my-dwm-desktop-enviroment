@@ -74,10 +74,12 @@ static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont,
 static const char *termcmd[]  = { "cool-retro-term", NULL };
 static const char *filescmd[] = { "thunar", NULL };
 
+static const char *print_screen[] = { "scrot", "/home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png", "--select", "--freeze", "--silent", "-l", "style=dash,width=3", NULL };
 static const char *swap_wallpaper[] = { "wallpapergen", NULL };
 static const char *swap_wallpaper_to_sfw[] = { "wallpapergen", "--sfw", NULL };
-static const char *swap_wallpaper_move_right[] = { "wallpapergen", "--right", NULL };
-static const char *swap_wallpaper_move_left[] = { "wallpapergen", "--left", NULL };
+static const char *wallpaper_move_right[] = { "wallpapergen", "--right", NULL };
+static const char *wallpaper_move_left[] = { "wallpapergen", "--left", NULL };
+static const char *wallpaper_ban[] = { "wallpapergen", "--ban", NULL };
 
 static const char *up_vol[]   = { "/usr/bin/pactl", "set-sink-volume", "alsa_output.pci-0000_2b_00.4.analog-stereo", "+5%",     NULL };
 static const char *down_vol[] = { "/usr/bin/pactl", "set-sink-volume", "alsa_output.pci-0000_2b_00.4.analog-stereo", "-5%",     NULL };
@@ -95,8 +97,11 @@ static Key keys[] = {
     { MODKEY,               XK_e,                       spawn,          { .v = filescmd } },
 	{ MODKEY,               XK_w,                       spawn,          { .v = swap_wallpaper } },  // generate new background images
     { MODKEY,               XK_s,                       spawn,          { .v = swap_wallpaper_to_sfw } },  // safe for work mode
-    { MODKEY,               XK_F11,                     spawn,          { .v = swap_wallpaper_move_left } },  // move right (or up)
-    { MODKEY,               XK_F12,                     spawn,          { .v = swap_wallpaper_move_right } },  // move left (or down) 
+    { MODKEY,               XK_F11,                     spawn,          { .v = wallpaper_move_left } },  // move right (or up)
+    { MODKEY,               XK_F12,                     spawn,          { .v = wallpaper_move_right } },  // move left (or down) 
+    { MODKEY,               XK_l,                       spawn,          { .v = wallpaper_ban } },  // ban image 
+
+    { MODKEY,               XK_Print,                   spawn,          { .v = print_screen } },  // Print screen 
 
     // Close program
 	{ MODKEY|ShiftMask,     XK_c,                       killclient,     {0} },
