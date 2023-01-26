@@ -1,6 +1,6 @@
 */*.o
 */*.orig
-*/*.reg
+*/*.rej
 */*.diff
 
 dwm/dwm

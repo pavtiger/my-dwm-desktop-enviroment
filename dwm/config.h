@@ -3,7 +3,7 @@
 #include <X11/XF86keysym.h>
 
 /* appearance */
-static const unsigned int borderpx  = 2;        /* border pixel of windows */
+static const unsigned int borderpx  = 0;        /* border pixel of windows */
 static const unsigned int gappx     = 5;        /* gaps between windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
@@ -37,12 +37,28 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Opera",    NULL,       NULL,       1,       0,           0 },
-    { "cool-retro-term",    NULL,       NULL,       2,       0,           0 },
-    { "Nemo",    NULL,       NULL,       4,       0,           0 },
-    { "TelegramDesktop",    NULL,       NULL,       8,       0,           0 },
-    { "Blueman-manager",    NULL,       NULL,       256,       0,           0 },
-    { "Pavucontrol",    NULL,       NULL,       256,       0,           0 },
+	{ "Navigator",			NULL,       NULL,       1,       0,           0 },
+	{ "firefox",			NULL,       NULL,       1,       0,           0 },
+    { "cool-retro-term",	NULL,       NULL,       2,       0,           0 },
+
+    { "jetbrains-clion",	NULL,       NULL,       4,       0,           0 },
+    { "jetbrains-pycharm",	NULL,       NULL,       4,       0,           0 },
+    { "jetbrains-webstorm",	NULL,       NULL,       4,       0,           0 },
+    { "jetbrains-toolbox",	NULL,       NULL,       4,       0,           0 },
+    { "jetbrains-client",	NULL,       NULL,       4,       0,           0 },
+
+    { "Nemo",				NULL,       NULL,       8,       0,           0 },
+    { "TelegramDesktop",	NULL,       NULL,       16,      0,           0 },
+
+    { "broken",				NULL,       NULL,       32,      0,           0 },
+    { "Spotify",			NULL,       NULL,       32,      0,           0 },
+
+    { "zoom",				NULL,       NULL,       64,      0,           0 },
+    { "mpv",				NULL,       NULL,       128,     0,           0 },
+    { "Popcorn-Time",		NULL,       NULL,       128,     0,           0 },
+
+    { "Blueman-manager",	NULL,       NULL,       256,     0,           0 },
+    { "Pavucontrol",		NULL,       NULL,       256,     0,           0 },
 };
 
 /* layout(s) */
@@ -76,6 +92,8 @@ static const char *termcmd[]  = { "cool-retro-term", NULL };
 static const char *filescmd[] = { "thunar", NULL };
 
 static const char *print_screen[] = { "scrot", "/home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png", "--select", "--freeze", "--silent", "-l", "style=dash,width=3", NULL };
+static const char *print_whole_screen[] = { "scrot", "/home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png", "--silent", NULL };
+
 static const char *swap_wallpaper[] = { "wallpapergen", NULL };
 static const char *swap_wallpaper_to_sfw[] = { "wallpapergen", "--sfw", NULL };
 static const char *wallpaper_move_right[] = { "wallpapergen", "--right", NULL };
@@ -83,9 +101,9 @@ static const char *wallpaper_move_left[] = { "wallpapergen", "--left", NULL };
 static const char *wallpaper_ban[] = { "wallpapergen", "--ban", NULL };
 static const char *wallpaper_info[] = { "wallpapergen", "--info", NULL };
 
-static const char *up_vol[]   = { "/usr/bin/pactl", "set-sink-volume", "alsa_output.pci-0000_2b_00.4.analog-stereo", "+5%",     NULL };
-static const char *down_vol[] = { "/usr/bin/pactl", "set-sink-volume", "alsa_output.pci-0000_2b_00.4.analog-stereo", "-5%",     NULL };
-static const char *mute_vol[] = { "/usr/bin/pactl", "set-sink-mute",   "alsa_output.pci-0000_2b_00.4.analog-stereo", "toggle",  NULL };
+static const char *up_vol[]   = { "sinkvolup",     NULL };
+static const char *down_vol[] = { "sinkvoldown",   NULL };
+static const char *mute_vol[] = { "sinkmute",          NULL };
 
 static const char *previous[] = { "/usr/bin/playerctl", "previous", NULL};
 static const char *play_pause[] = { "/usr/bin/playerctl", "play-pause", NULL};
@@ -100,11 +118,12 @@ static Key keys[] = {
 	{ MODKEY,               XK_w,                       spawn,          { .v = swap_wallpaper } },  // generate new background images
     { MODKEY,               XK_s,                       spawn,          { .v = swap_wallpaper_to_sfw } },  // safe for work mode
     { MODKEY,               XK_F11,                     spawn,          { .v = wallpaper_move_left } },  // move right (or up)
-    { MODKEY,               XK_F12,                     spawn,          { .v = wallpaper_move_right } },  // move left (or down) 
-    { MODKEY,               XK_o,                       spawn,          { .v = wallpaper_ban } },  // ban image 
-    { MODKEY,               XK_i,                       spawn,          { .v = wallpaper_info } },  // get image metadata 
-    
-    { MODKEY,               XK_Print,                   spawn,          { .v = print_screen } },  // print screen 
+    { MODKEY,               XK_F12,                     spawn,          { .v = wallpaper_move_right } },  // move left (or down)
+    { MODKEY,               XK_y,                       spawn,          { .v = wallpaper_ban } },  // ban image
+    { MODKEY,               XK_i,                       spawn,          { .v = wallpaper_info } },  // get image metadata
+
+    { MODKEY,               XK_Print,                   spawn,          { .v = print_screen } },  // print screen
+    { MODKEY,               XK_z,                       spawn,          { .v = print_whole_screen } },  // print whole screen
 
     // Close program
 	{ MODKEY|ShiftMask,     XK_c,                       killclient,     {0} },
@@ -127,7 +146,7 @@ static Key keys[] = {
 	{ MODKEY,               XK_period,                  focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,     XK_comma,                   tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,     XK_period,                  tagmon,         {.i = +1 } },
-    
+
     // Toggle bar
 	{ MODKEY,               XK_b,                       togglebar,      {0} },
 

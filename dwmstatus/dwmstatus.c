@@ -186,7 +186,7 @@ char *
 get_volume()
 {
     FILE *fp;
-    char buf[8];
+    char buf[64];
     fp = popen("getvolume", "r");
     if (fp == NULL)
     {
@@ -197,7 +197,7 @@ get_volume()
     if (fgets(buf, sizeof(buf), fp) != NULL)
     {
         pclose(fp);
-        return smprintf("%d", atoi(buf));
+        return smprintf(buf);
     }
     pclose(fp);
     return smprintf("-1");
@@ -328,7 +328,7 @@ int main(void)
         return 1;
     }
 
-    for (;; usleep(500 * 1000))
+    for (;; usleep(100 * 1000))
     {
         avgs = loadavg();
         bat = getbattery("/sys/class/power_supply/BAT0");
@@ -352,7 +352,7 @@ int main(void)
 
         // volume
         status = add_to_string(status, "^c#548EEB^");
-        char *volume_info = smprintf("  : %s%% ", vol);
+        char *volume_info = smprintf(" %s ", vol);
         status = add_to_string(status, volume_info);
         free(volume_info);
 
@@ -363,13 +363,10 @@ int main(void)
         free(load_info);
 
         // battery
-        // status = add_to_string(status, "\x08");
-	//if (!strcmp(bat, " "))
-        //{
+        status = add_to_string(status, "\x08");
         char *battery_info = smprintf("   : %s ", bat);
         status = add_to_string(status, battery_info);
         free(battery_info);
-        //};
 
         // time
         status = add_to_string(status, "^c#50B38D^");
