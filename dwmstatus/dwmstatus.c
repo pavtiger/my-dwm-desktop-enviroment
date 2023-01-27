@@ -197,7 +197,11 @@ get_volume()
     if (fgets(buf, sizeof(buf), fp) != NULL)
     {
         pclose(fp);
-        return smprintf(buf);
+        int l = strlen(buf);
+        if (buf[l - 1] == '\n') {
+            buf[l - 1] = '\0';
+        }
+        return smprintf("%s", buf);
     }
     pclose(fp);
     return smprintf("-1");
@@ -346,7 +350,7 @@ int main(void)
 
         // media name
         status = add_to_string(status, "^c#FFE32E^");
-	    char *media_info = smprintf("  : %s | %s ", media, player);
+	    char *media_info = smprintf("  %s %s ", media, player);
         status = add_to_string(status, media_info);
         free(media_info);
 
@@ -358,25 +362,25 @@ int main(void)
 
         // load
         status = add_to_string(status, "^c#BE33FF^");
-        char *load_info = smprintf("  : %s%% ", load);
+        char *load_info = smprintf("  %s%% ", load);
         status = add_to_string(status, load_info);
         free(load_info);
 
         // battery
         status = add_to_string(status, "\x08");
-        char *battery_info = smprintf("   : %s ", bat);
+        char *battery_info = smprintf("  %s ", bat);
         status = add_to_string(status, battery_info);
         free(battery_info);
 
         // time
         status = add_to_string(status, "^c#50B38D^");
-        char *time_info = smprintf("  : %s ", tmmsk);
+        char *time_info = smprintf("  %s ", tmmsk);
         status = add_to_string(status, time_info);
         free(time_info);
 
         // layout
         status = add_to_string(status, "^c#F24949^");
-        char *lang_info = smprintf("   : %s ", lang);
+        char *lang_info = smprintf("  %s ", lang);
         status = add_to_string(status, lang_info);
         free(lang_info);
 

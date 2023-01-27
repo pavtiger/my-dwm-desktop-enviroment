@@ -1,8 +1,8 @@
 mute=$(pactl get-sink-mute $(pactl get-default-sink) | awk -F ' ' 'NR<2 {print $2}')
 
 if [[ $mute == "yes" ]]; then
-	echo "🔇"
+	echo "ﱝ"
 else
-	pactl get-sink-volume $(pactl get-default-sink) | awk -F ' ' 'NR<2 {print $5 " " $7}'
+	echo  $(pactl get-sink-volume $(pactl get-default-sink) | awk -F ' ' 'NR<2 {print $5 " " $7}')db
 fi
 

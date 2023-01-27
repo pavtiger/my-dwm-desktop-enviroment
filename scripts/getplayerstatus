@@ -1,3 +1,9 @@
 #!/bin/bash
+status=$(playerctl --player playerctld status)
 
-playerctl --player playerctld status
+if [[ $status == "Playing" ]]; then
+	echo ""
+elif [[ $status == "Paused" ]]; then
+	echo ""
+fi
+
