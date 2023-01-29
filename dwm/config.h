@@ -95,11 +95,7 @@ static const char *print_screen[] = { "scrot", "/home/pavtiger/Pictures/%Y-%m-%d
 static const char *print_whole_screen[] = { "scrot", "/home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png", "--silent", NULL };
 
 static const char *swap_wallpaper[] = { "wallpapergen", NULL };
-static const char *swap_wallpaper_to_sfw[] = { "wallpapergen", "--sfw", NULL };
-static const char *wallpaper_move_right[] = { "wallpapergen", "--right", NULL };
-static const char *wallpaper_move_left[] = { "wallpapergen", "--left", NULL };
-static const char *wallpaper_ban[] = { "wallpapergen", "--ban", NULL };
-static const char *wallpaper_info[] = { "wallpapergen", "--info", NULL };
+static const char *wallpapergen_menu[] = { "wallpapergen", "--menu", NULL };
 
 static const char *up_vol[]   = { "sinkvolup",     NULL };
 static const char *down_vol[] = { "sinkvoldown",   NULL };
@@ -115,12 +111,8 @@ static Key keys[] = {
 	{ MODKEY,               XK_p,                       spawn,          { .v = dmenucmd } },
     { MODKEY,               XK_Return,                  spawn,          { .v = termcmd } },
 //  { MODKEY,               XK_e,                       spawn,          { .v = filescmd } },
-	{ MODKEY,               XK_w,                       spawn,          { .v = swap_wallpaper } },  // generate new background images
-    { MODKEY,               XK_s,                       spawn,          { .v = swap_wallpaper_to_sfw } },  // safe for work mode
-    { MODKEY,               XK_F11,                     spawn,          { .v = wallpaper_move_left } },  // move right (or up)
-    { MODKEY,               XK_F12,                     spawn,          { .v = wallpaper_move_right } },  // move left (or down)
-    { MODKEY,               XK_y,                       spawn,          { .v = wallpaper_ban } },  // ban image
-    { MODKEY,               XK_i,                       spawn,          { .v = wallpaper_info } },  // get image metadata
+	{ MODKEY,               XK_g,                       spawn,          { .v = swap_wallpaper } },  // generate new background images
+    { MODKEY,               XK_w,                       spawn,          { .v = wallpapergen_menu } },  // main wallpapergen menu window
 
     { MODKEY,               XK_Print,                   spawn,          { .v = print_screen } },  // print screen
     { MODKEY,               XK_z,                       spawn,          { .v = print_whole_screen } },  // print whole screen
