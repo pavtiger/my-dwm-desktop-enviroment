@@ -148,7 +148,7 @@ if operation_selected != b'':
         if width >= height / 9 * 16:
             # Change width
             trail = width - height / 9 * 16
-            image = image.crop((trail / 2 - adjustment, 0, width - trail / 2 - adjustment, height))
+            image = image.crop((trail / 2 + adjustment, 0, width - trail / 2 + adjustment, height))
         else:
             # Change height
             trail = height - width / 16 * 9
