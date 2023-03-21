@@ -67,6 +67,7 @@ static const Rule rules[] = {
     { "zoom",				NULL,       NULL,       64,      0,           0 },
     { "mpv",				NULL,       NULL,       128,     0,           0 },
     { "Popcorn-Time",		NULL,       NULL,       128,     0,           0 },
+    { "Steam",		        NULL,       NULL,       128,     0,           0 },
 
     { "Blueman-manager",	NULL,       NULL,       256,     0,           0 },
     { "Pavucontrol",		NULL,       NULL,       256,     0,           0 },
