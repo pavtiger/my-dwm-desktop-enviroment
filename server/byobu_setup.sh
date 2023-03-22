@@ -1,0 +1,1 @@
+/home/pavtiger/Docs/scripts/byobu_setup.sh
