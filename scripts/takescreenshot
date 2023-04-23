@@ -1,3 +1,3 @@
 scrot /home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png --silent
-echo -e "Screenshot taken" | timeout 1 dmenu -i -sb orange -sf black
+echo -e "Screenshot taken" | timeout 0.5 dmenu -i -sb orange -sf black
 
