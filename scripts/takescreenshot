@@ -1,3 +1,4 @@
-scrot /home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png --silent
-echo -e "Screenshot taken" | timeout 1 dmenu -i -sb orange -sf black
+active_screen=$(dwm-msg get_monitors | jq -c '.[] | select( .is_selected == true )')
+scrot /home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png --silent -M $(echo $active_screen | jq -r '.num')
+echo -e "Screenshot taken" | timeout 0.5 dmenu -i -sb orange -sf black
 
