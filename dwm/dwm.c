@@ -1009,8 +1009,10 @@ drawbar(Monitor *m)
 	}
 	drw_map(drw, m->barwin, 0, 0, m->ww - stw, bh);
     
-    drw_resize(drw, sw, bh);
-    // drw = drw_create(dpy, screen, root, sw, sh);        
+    drw_setscheme(drw, scheme[LENGTH(colors)]);
+    drw->scheme[ColFg] = scheme[SchemeNorm][ColBg];
+
+    drw_rect(drw, 0, 0, mons->ww, bh, 1, 0);
     drawstatusbar(m, bh, eb.text);
     drw_map(drw, eb.win, 0, 0, mons->ww, bh);
 }
