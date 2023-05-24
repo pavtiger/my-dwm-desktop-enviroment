@@ -7,18 +7,13 @@ from PIL import Image
 from json import load, dump
 import argparse
 import subprocess
-
-from screeninfo import get_monitors
+import json
 
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--menu",  required=False, help="Pop out main selection menu", action='store_true')
-ap.add_argument("--sfw",   required=False, help="Safe for work mode. Choose another background image", action='store_true')
-ap.add_argument("--left",  required=False, help="Move image cropout area to the left (or down in album mode)", action='store_true')
-ap.add_argument("--right", required=False, help="Move image cropout area to the right (or up in album mode)", action='store_true')
-ap.add_argument("--ban",   required=False, help="Ban current wallpaper from showing", action='store_true')
-ap.add_argument("--info",  required=False, help="Display metadata of current wallpaper and copy path/contents to clipboard", action='store_true')
 args = vars(ap.parse_args())
+
 
 # This script expects you to have a lot of your favourite wallpapers in "~/Pictures/wallpapers/JINX"
 # and an image for work mode
@@ -29,6 +24,10 @@ cache_directory = expanduser("~/.cache")
 # Load data file with all information for images
 data_file_path = join(wallpaper_directory, "wallpaper_info.json")
 banned_images = set()
+
+# Get active monitor
+active_display = json.loads(subprocess.check_output("dwm-msg get_monitors | jq -c '.[] | select( .is_selected == true )'", shell=True).decode("utf-8"))
+displays = json.loads(subprocess.check_output("dwm-msg get_monitors", shell=True).decode("utf-8"))
 
 if exists(data_file_path):
     with open(data_file_path, "r") as file:
@@ -51,33 +50,52 @@ def calculate_wallpaper_geometry(monitors):
         ver = max(ver, monitor[1] + monitor[3])
     return (hor, ver)
 
+
 def select_target_monitor():
     target_monitor = 0
     if len(monitors) > 1:
         monitor_range = list(range(1, len(monitors) + 1))
         monitor_options = "\n".join([str(elem) for elem in monitor_range])
-        prompt = f'echo -e "{monitor_options}" | dmenu -i -sb orange -sf black -p "Select monitor"'
+        active_display_prompt = f"active display ({active_display['num'] + 1})\n"
+        prompt = f'echo -e "{active_display_prompt + monitor_options}" | dmenu -i -sb orange -sf black -p "Select monitor"'
         process = subprocess.Popen(prompt, shell=True, stdout=subprocess.PIPE)
         process.wait()
-        target_monitor = int(process.stdout.read().decode("UTF-8")) - 1
+        output = process.stdout.read().decode("UTF-8")
+        if output[:14] == "active display":
+            target_monitor = int(active_display["num"])
+        else:
+            target_monitor = int(output) - 1
 
+    print(target_monitor)
     return target_monitor
+
+
+def return_error_message():
+    error_message = 'echo -e "Cannot adjust, ban or copy static backgrounds" | timeout 3 dmenu -i -sb orange -sf black'
+    process = subprocess.Popen(error_message, shell=True, stdout=subprocess.PIPE)
+    process.wait()
+    exit(0)
+
 
 # Set geometry of your monitors [offset_x, offset_y, width, height]
 monitors = [
-    [m.x, m.y, m.width, m.height]
-    for m in get_monitors()
+    [m['monitor_geometry']['x'], m['monitor_geometry']['y'], m['monitor_geometry']['width'], m['monitor_geometry']['height']]
+    for m in displays
 ]
-
 
 operation_selected = b'gen\n'
 if args["menu"]:
-    process = subprocess.Popen(f'echo -e "adjust\nban\nsfw\ninfo" | dmenu -i -sb orange -sf black -p "Wallpaper manager actions"', shell=True, stdout=subprocess.PIPE)
+    process = subprocess.Popen(f'echo -e "adjust\ngen\nban\nsfw\nblack\ninfo" | dmenu -i -sb orange -sf black -p "Wallpaper manager actions"', shell=True, stdout=subprocess.PIPE)
     process.wait()
 
     operation_selected = process.stdout.read()
+    if operation_selected == b'':
+        exit(0)
 
 if operation_selected == b'info\n':  # Get current image metadata
+    if data["current_paths"][0] == "black":
+        return_error_message()
+
     target_monitor = select_target_monitor()
 
     prompt = f'echo -e "content\npath" | dmenu -i -sb orange -sf black -p "path: {data["current_paths"][target_monitor]}"'
@@ -93,6 +111,9 @@ if operation_selected == b'info\n':  # Get current image metadata
     exit(0)
 
 if operation_selected == b'ban\n':  # Mark image as bad and never choose it again
+    if data["current_paths"][0] == "black" or data["current_paths"][0] == sfw_wallpaper_image:
+        return_error_message()
+
     target_monitor = select_target_monitor()
 
     prompt = 'echo -e "no\nyes" | dmenu -i -sb orange -sf black -p "confirm action"'
@@ -103,34 +124,47 @@ if operation_selected == b'ban\n':  # Mark image as bad and never choose it agai
         if data["current_paths"][target_monitor] not in banned_images:
             data["banned_images"].append(data["current_paths"][target_monitor])
 
-if operation_selected != b'':
-    all_images = []
 
-    if operation_selected == b'sfw\n':
-        all_images.append(sfw_wallpaper_image)
-    elif not operation_selected == b'adjust\n':
-        for root, dirs, files in walk(wallpaper_directory):
-            for image in files:
-                path = join(root, image)
-                if isfile(path) and path not in banned_images:
-                    if image.lower().endswith((".png", ".jpg")):
-                        all_images.append(path)
+all_images = []
 
-    if operation_selected == b'adjust\n':
-        target_monitor = select_target_monitor()
+if operation_selected == b'sfw\n':
+    all_images.append(sfw_wallpaper_image)
+elif not operation_selected == b'adjust\n':
+    for root, dirs, files in walk(wallpaper_directory):
+        for image in files:
+            path = join(root, image)
+            if isfile(path) and path not in banned_images:
+                if image.lower().endswith((".png", ".jpg")):
+                    all_images.append(path)
 
-        prompt = f'echo -e "-100\n-50\n-15\n-5\n+5\n+15\n+50\n+100" | dmenu -i -sb orange -sf black -p ""'
-        process = subprocess.Popen(prompt, shell=True, stdout=subprocess.PIPE)
-        process.wait()
+if operation_selected == b'adjust\n':  # This code is here because if operation is adjust, wallpaper still needs to be updated
+    if data["current_paths"][0] == "black":
+        return_error_message()
 
-        image_offset = int(process.stdout.read().decode("UTF-8"))
-        path = data["current_paths"][target_monitor]
-        data["adjustments"][path] = data["adjustments"].get(path, 0) + image_offset
+    target_monitor = select_target_monitor()
 
-    # Create wallpaper and paste images to it
-    wallpaper = Image.new('RGB', calculate_wallpaper_geometry(monitors), (0, 0, 0))
+    prompt = f'echo -e "-100\n-50\n-15\n-5\n+5\n+15\n+50\n+100" | dmenu -i -sb orange -sf black -p ""'
+    process = subprocess.Popen(prompt, shell=True, stdout=subprocess.PIPE)
+    process.wait()
 
-    for index, monitor in enumerate(monitors):
+    image_offset = int(process.stdout.read().decode("UTF-8"))
+    path = data["current_paths"][target_monitor]
+    data["adjustments"][path] = data["adjustments"].get(path, 0) + image_offset
+
+# Create wallpaper and paste images to it
+wallpaper = Image.new('RGB', calculate_wallpaper_geometry(monitors), (0, 0, 0))
+
+# Get rid of current wallpapers for non-existent monitors
+data["current_paths"] = data["current_paths"][:len(monitors)]
+
+for index, monitor in enumerate(monitors):
+    if operation_selected == b'black\n':
+        image = Image.new('RGB', (monitor[2], monitor[3]))
+        if index < len(data["current_paths"]):
+            data["current_paths"][index] = "black"
+        else:
+            data["current_paths"].append("black")
+    else:
         if operation_selected != b'adjust\n':
             if index < len(data["current_paths"]):
                 data["current_paths"][index] = choice(all_images)
@@ -140,6 +174,7 @@ if operation_selected != b'':
         path = data["current_paths"][index]
 
         image = Image.open(path) # Load random wallpaper
+
         adjustment = 0
         if path in data["adjustments"]:
             adjustment = data["adjustments"][path]
@@ -153,13 +188,13 @@ if operation_selected != b'':
             # Change height
             trail = height - width / 16 * 9
             image = image.crop((0, trail / 2 - adjustment, width, height - trail / 2 - adjustment))
-
         image = image.resize((monitor[2], monitor[3]))
-        wallpaper.paste(image, (monitor[0], monitor[1]))
 
-    # Save wallpaper to cache and run feh
-    wallpaper.save(join(cache_directory, "screen_wallpaper.jpg"), "JPEG")
-    system(f"feh --no-xinerama --bg-fill {join(cache_directory, 'screen_wallpaper.jpg')}")
+    wallpaper.paste(image, (monitor[0], monitor[1]))
+
+# Save wallpaper to cache and run feh
+wallpaper.save(join(cache_directory, "screen_wallpaper.jpg"), "JPEG")
+system(f"feh --no-xinerama --bg-fill {join(cache_directory, 'screen_wallpaper.jpg')}")
 
 with open(data_file_path, "w") as file:
     dump(data, file, sort_keys=True, indent=4)
