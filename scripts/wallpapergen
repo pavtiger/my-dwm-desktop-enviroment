@@ -126,7 +126,7 @@ if operation_selected != b'':
                     if image.lower().endswith((".png", ".jpg")):
                         all_images.append(path)
 
-    if operation_selected == b'adjust\n':
+    if operation_selected == b'adjust\n':  # This code is here because if operation is adjust, wallpaper still needs to be updated
         target_monitor = select_target_monitor()
 
         prompt = f'echo -e "-100\n-50\n-15\n-5\n+5\n+15\n+50\n+100" | dmenu -i -sb orange -sf black -p ""'
@@ -149,22 +149,26 @@ if operation_selected != b'':
 
         path = data["current_paths"][index]
 
-        image = Image.open(path) # Load random wallpaper
-        adjustment = 0
-        if path in data["adjustments"]:
-            adjustment = data["adjustments"][path]
-
-        width, height = image.size
-        if width >= height / 9 * 16:
-            # Change width
-            trail = width - height / 9 * 16
-            image = image.crop((trail / 2 + adjustment, 0, width - trail / 2 + adjustment, height))
+        if operation_selected == b'black\n':
+            image = Image.new('RGB', (monitor[2], monitor[3]))
         else:
-            # Change height
-            trail = height - width / 16 * 9
-            image = image.crop((0, trail / 2 - adjustment, width, height - trail / 2 - adjustment))
+            image = Image.open(path) # Load random wallpaper
 
-        image = image.resize((monitor[2], monitor[3]))
+            adjustment = 0
+            if path in data["adjustments"]:
+                adjustment = data["adjustments"][path]
+
+            width, height = image.size
+            if width >= height / 9 * 16:
+                # Change width
+                trail = width - height / 9 * 16
+                image = image.crop((trail / 2 + adjustment, 0, width - trail / 2 + adjustment, height))
+            else:
+                # Change height
+                trail = height - width / 16 * 9
+                image = image.crop((0, trail / 2 - adjustment, width, height - trail / 2 - adjustment))
+            image = image.resize((monitor[2], monitor[3]))
+
         wallpaper.paste(image, (monitor[0], monitor[1]))
 
     # Save wallpaper to cache and run feh
