@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+import subprocess
+from time import sleep
+import os
+
+from display_config import states
+
+last_displays = []
+
+while True:
+    xrandr_output = subprocess.check_output('xrandr | grep -w "connected"', shell=True).decode("utf-8").strip("\n")
+
+    displays = [] 
+    for index, line in enumerate(xrandr_output.split('\n')):
+        displays.append(line.split()[0])
+    
+    if displays != last_displays:
+        print("update")
+        os.system("xrandr -s 0")  # Reset current display configuration
+        commands = states[repr(displays)]
+
+        for command in commands:
+            os.system(command)
+
+    last_displays = displays
+    sleep(1)
+
