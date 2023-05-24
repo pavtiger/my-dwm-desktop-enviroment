@@ -7,8 +7,7 @@ from PIL import Image
 from json import load, dump
 import argparse
 import subprocess
-
-from screeninfo import get_monitors
+import json
 
 
 ap = argparse.ArgumentParser()
@@ -20,6 +19,7 @@ ap.add_argument("--ban",   required=False, help="Ban current wallpaper from show
 ap.add_argument("--info",  required=False, help="Display metadata of current wallpaper and copy path/contents to clipboard", action='store_true')
 args = vars(ap.parse_args())
 
+
 # This script expects you to have a lot of your favourite wallpapers in "~/Pictures/wallpapers/JINX"
 # and an image for work mode
 wallpaper_directory = expanduser("~/Pictures/wallpapers/JINX");
@@ -29,6 +29,10 @@ cache_directory = expanduser("~/.cache")
 # Load data file with all information for images
 data_file_path = join(wallpaper_directory, "wallpaper_info.json")
 banned_images = set()
+
+# Get active monitor
+active_display = json.loads(subprocess.check_output("dwm-msg get_monitors | jq -c '.[] | select( .is_selected == true )'", shell=True).decode("utf-8"))
+displays = json.loads(subprocess.check_output("dwm-msg get_monitors", shell=True).decode("utf-8"))
 
 if exists(data_file_path):
     with open(data_file_path, "r") as file:
@@ -51,28 +55,34 @@ def calculate_wallpaper_geometry(monitors):
         ver = max(ver, monitor[1] + monitor[3])
     return (hor, ver)
 
+
 def select_target_monitor():
     target_monitor = 0
     if len(monitors) > 1:
         monitor_range = list(range(1, len(monitors) + 1))
         monitor_options = "\n".join([str(elem) for elem in monitor_range])
-        prompt = f'echo -e "{monitor_options}" | dmenu -i -sb orange -sf black -p "Select monitor"'
+        active_display_prompt = f"active display ({active_display['num'] + 1})\n"
+        prompt = f'echo -e "{active_display_prompt + monitor_options}" | dmenu -i -sb orange -sf black -p "Select monitor"'
         process = subprocess.Popen(prompt, shell=True, stdout=subprocess.PIPE)
         process.wait()
-        target_monitor = int(process.stdout.read().decode("UTF-8")) - 1
+        output = process.stdout.read().decode("UTF-8")
+        if output[:14] == "active display":
+            target_monitor = int(active_display["num"])
+        else:
+            target_monitor = int(output) - 1
 
+    print(target_monitor)
     return target_monitor
 
 # Set geometry of your monitors [offset_x, offset_y, width, height]
 monitors = [
-    [m.x, m.y, m.width, m.height]
-    for m in get_monitors()
+    [m['monitor_geometry']['x'], m['monitor_geometry']['y'], m['monitor_geometry']['width'], m['monitor_geometry']['height']]
+    for m in displays
 ]
-
 
 operation_selected = b'gen\n'
 if args["menu"]:
-    process = subprocess.Popen(f'echo -e "adjust\nban\nsfw\ninfo" | dmenu -i -sb orange -sf black -p "Wallpaper manager actions"', shell=True, stdout=subprocess.PIPE)
+    process = subprocess.Popen(f'echo -e "adjust\nban\nsfw\nblack\ninfo" | dmenu -i -sb orange -sf black -p "Wallpaper manager actions"', shell=True, stdout=subprocess.PIPE)
     process.wait()
 
     operation_selected = process.stdout.read()
