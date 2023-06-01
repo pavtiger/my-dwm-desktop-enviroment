@@ -12,7 +12,13 @@ import json
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--menu",  required=False, help="Pop out main selection menu", action='store_true')
+ap.add_argument("--gen",   required=False, help="Generate new wallpaper for a specific display", action='store_true')
 args = vars(ap.parse_args())
+
+
+if args["gen"] and args["menu"]:
+    print("You can't have both --menu and --gen flags")
+    exit(0)
 
 
 # This script expects you to have a lot of your favourite wallpapers in "~/Pictures/wallpapers/JINX"
@@ -41,6 +47,7 @@ else:
             "adjustments": {}
     }
 
+
 # Calculate dimensions of all screens together
 def calculate_wallpaper_geometry(monitors):
     hor = 0
@@ -51,22 +58,32 @@ def calculate_wallpaper_geometry(monitors):
     return (hor, ver)
 
 
-def select_target_monitor():
+def select_target_monitor(can_select_all=False):
     target_monitor = 0
     if len(monitors) > 1:
         monitor_range = list(range(1, len(monitors) + 1))
+        monitor_range.remove(active_display['num'] + 1)  # Remove element that is going to be printed as current monitor
         monitor_options = "\n".join([str(elem) for elem in monitor_range])
+        all_monitors_prompt = ""
+        if can_select_all:
+            all_monitors_prompt = "all\n"
+
         active_display_prompt = f"active display ({active_display['num'] + 1})\n"
-        prompt = f'echo -e "{active_display_prompt + monitor_options}" | dmenu -i -sb orange -sf black -p "Select monitor"'
+        prompt = f'echo -e "{all_monitors_prompt + active_display_prompt + monitor_options}" | dmenu -i -sb orange -sf black -p "Select monitor"'
         process = subprocess.Popen(prompt, shell=True, stdout=subprocess.PIPE)
         process.wait()
         output = process.stdout.read().decode("UTF-8")
+        if len(output) == 0:
+            print("You have to choose a monitor for this action. Exiting")
+            exit(0)
+
         if output[:14] == "active display":
             target_monitor = int(active_display["num"])
+        elif output[:3] == "all":
+            target_monitor = -1
         else:
             target_monitor = int(output) - 1
 
-    print(target_monitor)
     return target_monitor
 
 
@@ -83,7 +100,7 @@ monitors = [
     for m in displays
 ]
 
-operation_selected = b'gen\n'
+operation_selected = b''
 if args["menu"]:
     process = subprocess.Popen(f'echo -e "adjust\ngen\nban\nsfw\nblack\ninfo" | dmenu -i -sb orange -sf black -p "Wallpaper manager actions"', shell=True, stdout=subprocess.PIPE)
     process.wait()
@@ -91,6 +108,11 @@ if args["menu"]:
     operation_selected = process.stdout.read()
     if operation_selected == b'':
         exit(0)
+
+target_monitor = -1
+if args["gen"] or operation_selected == b'gen\n':  # Ask user which screen to generate
+    target_monitor = select_target_monitor(True)
+
 
 if operation_selected == b'info\n':  # Get current image metadata
     if data["current_paths"][0] == "black":
@@ -110,6 +132,18 @@ if operation_selected == b'info\n':  # Get current image metadata
         os.system(f'cat {data["current_paths"][target_monitor]} | xclip -sel clipboard -target image/png -i')
     exit(0)
 
+all_images = []
+if operation_selected == b'sfw\n':
+    all_images.append(sfw_wallpaper_image)
+elif not operation_selected == b'adjust\n':
+    for root, dirs, files in walk(wallpaper_directory):
+        for image in files:
+            path = join(root, image)
+            if isfile(path) and path not in banned_images:
+                if image.lower().endswith((".png", ".jpg")):
+                    all_images.append(path)
+
+
 if operation_selected == b'ban\n':  # Mark image as bad and never choose it again
     if data["current_paths"][0] == "black" or data["current_paths"][0] == sfw_wallpaper_image:
         return_error_message()
@@ -124,18 +158,8 @@ if operation_selected == b'ban\n':  # Mark image as bad and never choose it agai
         if data["current_paths"][target_monitor] not in banned_images:
             data["banned_images"].append(data["current_paths"][target_monitor])
 
+        data["current_paths"][target_monitor] = choice(all_images)
 
-all_images = []
-
-if operation_selected == b'sfw\n':
-    all_images.append(sfw_wallpaper_image)
-elif not operation_selected == b'adjust\n':
-    for root, dirs, files in walk(wallpaper_directory):
-        for image in files:
-            path = join(root, image)
-            if isfile(path) and path not in banned_images:
-                if image.lower().endswith((".png", ".jpg")):
-                    all_images.append(path)
 
 if operation_selected == b'adjust\n':  # This code is here because if operation is adjust, wallpaper still needs to be updated
     if data["current_paths"][0] == "black":
@@ -151,11 +175,13 @@ if operation_selected == b'adjust\n':  # This code is here because if operation 
     path = data["current_paths"][target_monitor]
     data["adjustments"][path] = data["adjustments"].get(path, 0) + image_offset
 
-# Create wallpaper and paste images to it
+
+# Create wallpaper for pasting images to it
 wallpaper = Image.new('RGB', calculate_wallpaper_geometry(monitors), (0, 0, 0))
 
 # Get rid of current wallpapers for non-existent monitors
 data["current_paths"] = data["current_paths"][:len(monitors)]
+
 
 for index, monitor in enumerate(monitors):
     if operation_selected == b'black\n':
@@ -165,11 +191,12 @@ for index, monitor in enumerate(monitors):
         else:
             data["current_paths"].append("black")
     else:
-        if operation_selected != b'adjust\n':
-            if index < len(data["current_paths"]):
-                data["current_paths"][index] = choice(all_images)
-            else:
-                data["current_paths"].append(choice(all_images))
+        if target_monitor == index or target_monitor == -1:  # Change wallpapers on all monitors
+            if operation_selected != b'adjust\n' and operation_selected != b'ban\n':
+                if index < len(data["current_paths"]):  # Chose random wallpaper from `all_images`
+                    data["current_paths"][index] = choice(all_images)
+                else:
+                    data["current_paths"].append(choice(all_images))
 
         path = data["current_paths"][index]
 

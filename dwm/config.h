@@ -42,14 +42,15 @@ static const char *colors[][3]      = {
 /* tagging */
 static const char *tags[] = { "1:browser", "2:term", "3", "4:nemo", "5:telegram", "6:spotify", "7", "8:media", "9:settings" };
 
+/* get window class command: xprop | grep -i WM_CLASS */
 static const Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Navigator",			NULL,       NULL,       1,       0,           0 },
-	{ "firefox",			NULL,       NULL,       1,       0,           0 },
+    { "Navigator",		NULL,       NULL,       1,       0,           0 },
+    { "firefox",		NULL,       NULL,       1,       0,           0 },
     { "cool-retro-term",	NULL,       NULL,       2,       0,           0 },
 
     { "jetbrains-clion",	NULL,       NULL,       4,       0,           0 },
@@ -58,19 +59,21 @@ static const Rule rules[] = {
     { "jetbrains-toolbox",	NULL,       NULL,       4,       0,           0 },
     { "jetbrains-client",	NULL,       NULL,       4,       0,           0 },
 
-    { "Nemo",				NULL,       NULL,       8,       0,           0 },
+    { "Nemo",			NULL,       NULL,       8,       0,           0 },
     { "TelegramDesktop",	NULL,       NULL,       16,      0,           0 },
 
-    { "broken",				NULL,       NULL,       32,      0,           0 },
-    { "Spotify",			NULL,       NULL,       32,      0,           0 },
+    { "broken",			NULL,       NULL,       32,      0,           0 },
+    { "Spotify",		NULL,       NULL,       32,      0,           0 },
 
-    { "zoom",				NULL,       NULL,       64,      0,           0 },
-    { "mpv",				NULL,       NULL,       128,     0,           0 },
+    { "zoom",			NULL,       NULL,       64,      0,           0 },
+    { "mpv",			NULL,       NULL,       128,     0,           0 },
     { "Popcorn-Time",		NULL,       NULL,       128,     0,           0 },
-    { "Steam",		        NULL,       NULL,       128,     0,           0 },
+    { "Steam",			NULL,       NULL,       128,     0,           0 },
 
+    /* settings workspace */
     { "Blueman-manager",	NULL,       NULL,       256,     0,           0 },
     { "Pavucontrol",		NULL,       NULL,       256,     0,           0 },
+    { "Arandr",			NULL,       NULL,       256,     0,           0 },
 };
 
 /* layout(s) */
@@ -106,7 +109,7 @@ static const char *filescmd[] = { "thunar", NULL };
 static const char *print_screen[] = { "scrot", "/home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png", "--select", "--freeze", "--silent", "-l", "style=dash,width=3", NULL };
 static const char *print_whole_screen[] = { "takescreenshot", NULL };
 
-static const char *swap_wallpaper[] = { "wallpapergen", NULL };
+static const char *swap_wallpaper[] = { "wallpapergen", "--gen", NULL };
 static const char *wallpapergen_menu[] = { "wallpapergen", "--menu", NULL };
 
 static const char *up_vol[]   = { "sinkvolup",     NULL };
