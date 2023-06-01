@@ -106,7 +106,7 @@ static const char *filescmd[] = { "thunar", NULL };
 static const char *print_screen[] = { "scrot", "/home/pavtiger/Pictures/%Y-%m-%d-%H:%M.png", "--select", "--freeze", "--silent", "-l", "style=dash,width=3", NULL };
 static const char *print_whole_screen[] = { "takescreenshot", NULL };
 
-static const char *swap_wallpaper[] = { "wallpapergen", NULL };
+static const char *swap_wallpaper[] = { "wallpapergen", "--gen", NULL };
 static const char *wallpapergen_menu[] = { "wallpapergen", "--menu", NULL };
 
 static const char *up_vol[]   = { "sinkvolup",     NULL };
