@@ -366,6 +366,8 @@ int main(void)
         status = add_to_string(status, load_info);
         free(load_info);
 
+        status = add_to_string(status, smprintf(";"));
+
         // battery
         status = add_to_string(status, "\x08");
         char *battery_info = smprintf("  %s ", bat);
