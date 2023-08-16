@@ -40,7 +40,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "1:browser", "2:term", "3", "4:nemo", "5:telegram", "6:spotify", "7", "8:media", "9:settings" };
+static const char *tags[] = { "1:browser", "2:term", "3:dev", "4:nemo", "5:telegram", "6:spotify", "7:notes", "8:media", "9:settings" };
 
 /* get window class command: xprop | grep -i WM_CLASS */
 static const Rule rules[] = {
@@ -65,7 +65,10 @@ static const Rule rules[] = {
     { "broken",			NULL,       NULL,       32,      0,           0 },
     { "Spotify",		NULL,       NULL,       32,      0,           0 },
 
-    { "zoom",			NULL,       NULL,       64,      0,           0 },
+    { "Apostrophe",			NULL,       NULL,       64,      0,           0 },
+    { "PureRef",			NULL,       NULL,       64,      0,           0 },
+
+    { "zoom",			NULL,       NULL,       128,      0,           0 },
     { "mpv",			NULL,       NULL,       128,     0,           0 },
     { "Popcorn-Time",		NULL,       NULL,       128,     0,           0 },
     { "Steam",			NULL,       NULL,       128,     0,           0 },
