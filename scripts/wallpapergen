@@ -21,14 +21,15 @@ if args["gen"] and args["menu"]:
     exit(0)
 
 
-# This script expects you to have a lot of your favourite wallpapers in "~/Pictures/wallpapers/JINX"
+# This script expects you to have a lot of your favourite wallpapers in "~/Pictures/wallpapers/wallpapers"
 # and an image for work mode
-wallpaper_directory = expanduser("~/Pictures/wallpapers/JINX");
-sfw_wallpaper_image = expanduser("~/Pictures/wallpapers/cosmic-cliffs.png");
+root_directory = expanduser("~/Pictures/wallpapers");
+wallpaper_directory = expanduser(os.path.join(root_directory, "wallpapers"));
+sfw_wallpaper_image = expanduser(os.path.join(root_directory, "cosmic-cliffs.png"));
 cache_directory = expanduser("~/.cache")
 
 # Load data file with all information for images
-data_file_path = join(wallpaper_directory, "wallpaper_info.json")
+data_file_path = join(root_directory, "wallpaper_info.json")
 banned_images = set()
 
 # Get active monitor
