@@ -40,7 +40,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "1:browser", "2:term", "3:dev", "4:nemo", "5:telegram", "6:spotify", "7:notes", "8:media", "9:settings" };
+static const char *tags[] = { "1:browser", "2:term", "3:dev", "4:nemo", "5:telegram", "6:spotify", "7:notes", "8:media", "9:settings", "q", "w", "e", "r" };
 
 /* get window class command: xprop | grep -i WM_CLASS */
 static const Rule rules[] = {
@@ -58,6 +58,7 @@ static const Rule rules[] = {
     { "jetbrains-webstorm",	NULL,       NULL,       4,       0,           0 },
     { "jetbrains-toolbox",	NULL,       NULL,       4,       0,           0 },
     { "jetbrains-client",	NULL,       NULL,       4,       0,           0 },
+    { "Blender",	        NULL,       NULL,       4,       0,           0 },
 
     { "Nemo",			NULL,       NULL,       8,       0,           0 },
     { "TelegramDesktop",	NULL,       NULL,       16,      0,           0 },
@@ -130,7 +131,7 @@ static Key keys[] = {
     { MODKEY,               XK_Return,                  spawn,          { .v = termcmd } },
 //  { MODKEY,               XK_e,                       spawn,          { .v = filescmd } },
 	{ MODKEY,               XK_g,                       spawn,          { .v = swap_wallpaper } },  // generate new background images
-    { MODKEY,               XK_w,                       spawn,          { .v = wallpapergen_menu } },  // main wallpapergen menu window
+    { MODKEY,               XK_s,                       spawn,          { .v = wallpapergen_menu } },  // main wallpapergen menu window
 
     { MODKEY,               XK_Print,                   spawn,          { .v = print_screen } },  // print screen
     { MODKEY,               XK_z,                       spawn,          { .v = print_whole_screen } },  // print whole screen
@@ -139,7 +140,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,     XK_c,                       killclient,     {0} },
 
     // Exit dwm
-	{ MODKEY|ShiftMask,     XK_q,                       quitprompt,           {0} },
+	{ MODKEY|ShiftMask,     XK_Shift_R,                       quitprompt,           {0} },
 
     // Audio controls
 	{ 0,                    XF86XK_AudioLowerVolume,    spawn,          {.v = down_vol } },
@@ -163,7 +164,7 @@ static Key keys[] = {
     // Master & stack navigation
 	{ MODKEY,               XK_j,                       focusstack,     {.i = +1 } },
 	{ MODKEY,               XK_k,                       focusstack,     {.i = -1 } },
-	{ MODKEY,               XK_e,                       incnmaster,     {.i = +1 } },
+	{ MODKEY,               XK_i,                       incnmaster,     {.i = +1 } },
 	{ MODKEY,               XK_d,                       incnmaster,     {.i = -1 } },
 	{ MODKEY,               XK_h,                       setmfact,       {.f = -0.05} },
 	{ MODKEY,               XK_l,                       setmfact,       {.f = +0.05} },
@@ -171,7 +172,7 @@ static Key keys[] = {
 
     // Layouts
 	{ MODKEY,               XK_t,                       setlayout,      {.v = &layouts[0]} },
-	{ MODKEY,               XK_f,                       setlayout,      {.v = &layouts[1]} },
+	{ MODKEY,               XK_f,                       setlayout,      {.v = &layouts[0]} },
 	{ MODKEY,               XK_m,                       setlayout,      {.v = &layouts[2]} },
 	{ MODKEY|ShiftMask,     XK_space,                   togglefloating, {0} },
 
@@ -190,8 +191,12 @@ static Key keys[] = {
     TAGKEYS(                XK_5,                                   4)
     TAGKEYS(                XK_6,                                   5)
     TAGKEYS(                XK_7,                                   6)
-    TAGKEYS(                XK_9,                                   8)
     TAGKEYS(                XK_8,                                   7)
+    TAGKEYS(                XK_9,                                   8)
+    TAGKEYS(                XK_q,                                   9)
+    TAGKEYS(                XK_w,                                   10)
+    TAGKEYS(                XK_e,                                   11)
+    TAGKEYS(                XK_r,                                   12)
 };
 
 /* button definitions */
