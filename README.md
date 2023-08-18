@@ -20,5 +20,7 @@ password=<password>
 domain=WORKGROUP
 ```
 
+In dwmstatus I use emoji from [Nerdfonts](https://www.nerdfonts.com/cheat-sheet)
+
 ## Note
 For wallpapergen script it is strongly recommended to use only 4K images if they are not the same aspect ratio as your screen. As this will lead to them being cropped and appearing very low-res and soapy.
