@@ -296,7 +296,7 @@ get_player_status()
         return smprintf("%s", buf);
     }
     pclose(fp);
-    return smprintf("No player running");
+    return smprintf("");
 }
 
 char *
@@ -304,8 +304,7 @@ get_song_name()
 {
     FILE *fp;
     char buf[128];
-    // fp = popen("getmedianame", "r");
-    fp = popen("playerctl --player playerctld  metadata --format \"{{ artist }} - {{ title }}\"", "r");
+    fp = popen("getmedianame", "r");
     if (fp == NULL)
     {
         printf("Failed to run command\n");
