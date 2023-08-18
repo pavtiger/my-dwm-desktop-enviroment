@@ -1,0 +1,5 @@
+output_sink=$(pacmd list-sinks | grep -Pzo "name: <$(pactl get-default-sink)>(.*\n)*" | sed \$d | grep -e "device.description" | cut -f2 -d\" | head -1)
+input_sink=$()
+
+echo "󰓃 $output_sink"
+

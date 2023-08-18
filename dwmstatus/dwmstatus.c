@@ -208,6 +208,31 @@ get_volume()
 }
 
 char *
+get_sink()
+{
+    FILE *fp;
+    char buf[64];
+    fp = popen("sinkcurrent", "r");
+    if (fp == NULL)
+    {
+        printf("Failed to run command\n");
+        exit(1);
+    }
+
+    if (fgets(buf, sizeof(buf), fp) != NULL)
+    {
+        pclose(fp);
+        int l = strlen(buf);
+        if (buf[l - 1] == '\n') {
+            buf[l - 1] = '\0';
+        }
+        return smprintf("%s", buf);
+    }
+    pclose(fp);
+    return smprintf("-1");
+}
+
+char *
 get_lang()
 {
     FILE *fp;
@@ -323,6 +348,7 @@ int main(void)
     char *media;
 
     char *vol;
+    char *sink;
     char *lang;
     char *load;
 
@@ -341,6 +367,7 @@ int main(void)
         player = get_player_status();
         media = get_song_name();
         vol = get_volume();
+        sink = get_sink();
         lang = get_lang();
         load = get_cpu();
 
@@ -359,6 +386,12 @@ int main(void)
         char *volume_info = smprintf(" %s ", vol);
         status = add_to_string(status, volume_info);
         free(volume_info);
+
+        // output and input sinks
+        status = add_to_string(status, "^c#548EEB^");
+        char *sink_info = smprintf(" %s ", sink);
+        status = add_to_string(status, sink_info);
+        free(sink_info);
 
         // load
         status = add_to_string(status, "^c#BE33FF^");
